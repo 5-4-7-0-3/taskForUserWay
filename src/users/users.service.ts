@@ -21,15 +21,6 @@ export class UsersService {
 
   async create(user: CreateUserDto): Promise<ResponseDto<User>> {
     try {
-      const existUser = await this.userRepository.findOne({
-        where: { email: user.email },
-      });
-
-      if (existUser) {
-        this.customLogger.error(this.create.name, `User already exists: ${existUser.id}`);
-        throw new ConflictException('This email already exists!');
-      };
-
       const savedUser = await this.userRepository.save(user);
       return await this.customResponse.generateResponse(
         HttpStatus.CREATED,
@@ -55,6 +46,23 @@ export class UsersService {
       );
     } catch (error) {
       this.customLogger.error(this.findByUsername.name, error.message);
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async findOneByEmail(email: string): Promise<ResponseDto<User>> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { email },
+      });
+
+      return await this.customResponse.generateResponse(
+        HttpStatus.OK,
+        user,
+        'working'
+      );
+    } catch (error) {
+      this.customLogger.error(this.findOneByEmail.name, error.message);
       throw new InternalServerErrorException(error);
     }
   }
