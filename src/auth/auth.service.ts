@@ -1,4 +1,4 @@
-import { ConflictException, HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CustomResponse, ResponseDto } from 'src/middlewares/responseMiddleware';
 import { CustomLogger } from 'src/middlewares/loggerMiddleware';
 import { UsersService } from 'src/users/users.service';
@@ -58,9 +58,8 @@ export class AuthService {
         }
     }
 
-    async login({ email, password }: AuthDto): Promise<ResponseDto<AuthTokens>> {
+    async login(user: User): Promise<ResponseDto<AuthTokens>> {
         try {
-            const user = await this.validateUser(email, password);
 
             const result = await this.create(user);
 
@@ -84,9 +83,16 @@ export class AuthService {
         }
     }
 
-    async validateUser(email: string, password: string): Promise<User> {
+    async validateUser({ email, password }: AuthDto): Promise<User> {
         try {
+
+
             const user = await this.usersService.findOneByEmail(email);
+            if (!user.result) {
+                this.customLogger.error(this.validateUser.name, `User not found {email: ${email}}`);
+                throw new NotFoundException('User not found');
+            }
+
             if (user && (await argon2.verify(user.result.password, password))) {
                 return user.result;
             }
