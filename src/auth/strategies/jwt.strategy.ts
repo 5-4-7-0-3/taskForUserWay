@@ -1,8 +1,8 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { CustomLogger } from '../../middlewares/loggerMiddleware';
 import * as dotenv from 'dotenv';
-import { CustomLogger } from 'src/middlewares/loggerMiddleware';
 
 dotenv.config();
 

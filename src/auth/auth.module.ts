@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { UsersService } from 'src/users/users.service';
-import { CustomLogger } from 'src/middlewares/loggerMiddleware';
-import { CustomResponse } from 'src/middlewares/responseMiddleware';
-import { JwtService } from '@nestjs/jwt';
-import { UsersModule } from 'src/users/users.module';
-import { User } from 'src/users/entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
+import { JwtService } from '@nestjs/jwt';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+import { UsersService } from '../users/users.service';
+import { CustomLogger } from '../middlewares/loggerMiddleware';
+import { CustomResponse } from '../middlewares/responseMiddleware';
+import { UsersModule } from '../users/users.module';
+import { User } from '../users/entities/user.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 

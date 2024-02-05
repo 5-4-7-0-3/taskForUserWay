@@ -2,8 +2,8 @@ import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { CustomResponse, ResponseDto } from 'src/middlewares/responseMiddleware';
-import { CustomLogger } from 'src/middlewares/loggerMiddleware';
+import { CustomResponse, ResponseDto } from '../middlewares/responseMiddleware';
+import { CustomLogger } from '../middlewares/loggerMiddleware';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
@@ -28,7 +28,8 @@ export class UsersService {
         'created'
       );
     } catch (error) {
-
+      this.customLogger.error(this.create.name, error.message);
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -36,7 +37,7 @@ export class UsersService {
     try {
       const user = await this.userRepository.findOne({ where: { username } });
       if (!user) {
-        this.customLogger.error(this.findByUsername.name, `User not found {id: ${username}}`);
+        this.customLogger.error(this.findByUsername.name, `User not found {username: ${username}}`);
         throw new NotFoundException('User not found');
       }
       return await this.customResponse.generateResponse(
@@ -59,7 +60,7 @@ export class UsersService {
       return await this.customResponse.generateResponse(
         HttpStatus.OK,
         user,
-        'working'
+        'finded'
       );
     } catch (error) {
       this.customLogger.error(this.findOneByEmail.name, error.message);

@@ -1,12 +1,12 @@
 import { ConflictException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { CustomResponse, ResponseDto } from 'src/middlewares/responseMiddleware';
-import { CustomLogger } from 'src/middlewares/loggerMiddleware';
-import { UsersService } from 'src/users/users.service';
-import { User } from 'src/users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import * as dotenv from 'dotenv';
 import * as IORedis from 'ioredis';
+import { CustomResponse, ResponseDto } from '../middlewares/responseMiddleware';
+import { CustomLogger } from '../middlewares/loggerMiddleware';
+import { UsersService } from '../users/users.service';
+import { User } from '../users/entities/user.entity';
 import { AuthDto } from './dto/auth.dto';
 
 
@@ -81,7 +81,7 @@ export class AuthService {
         }
     }
 
-    private async hashPassword(password: string): Promise<string> {
+    async hashPassword(password: string): Promise<string> {
         try {
             return await argon2.hash(password)
         } catch (error) {
@@ -111,7 +111,7 @@ export class AuthService {
         }
     }
 
-    private async create(user: User): Promise<AuthTokens> {
+    async create(user: User): Promise<AuthTokens> {
         try {
             const accessToken = this.generateToken(user, 'access', process.env.JWT_ACCESS_SECRET);
             const refreshToken = this.generateToken(user, 'refresh', process.env.JWT_REFRESH_SECRET);
@@ -125,7 +125,7 @@ export class AuthService {
         }
     }
 
-    private generateToken(user: User, type: 'access' | 'refresh', secret: string): string {
+    generateToken(user: User, type: 'access' | 'refresh', secret: string): string {
         try {
             const accessExpiresIn = process.env.JWT_ACCESS_EXPIRES_IN;
             const refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN;
@@ -139,7 +139,7 @@ export class AuthService {
         }
     }
 
-    private async saveRefreshTokenToRedis(userId: number, refreshToken: string): Promise<void> {
+    async saveRefreshTokenToRedis(userId: number, refreshToken: string): Promise<void> {
         try {
             await this.redisClient.set(`user:${userId}:refresh-token`, refreshToken);
         } catch (error) {
