@@ -6,7 +6,9 @@ import { User } from 'src/users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import * as dotenv from 'dotenv';
+import * as IORedis from 'ioredis';
 import { AuthDto } from './dto/auth.dto';
+
 
 dotenv.config();
 
@@ -24,12 +26,17 @@ export interface AuthTokens {
 @Injectable()
 export class AuthService {
     private readonly customLogger: CustomLogger;
+    private readonly redisClient: IORedis.Redis;
     constructor(
         private readonly customResponse: CustomResponse,
         private readonly usersService: UsersService,
         private readonly jwtService: JwtService,
     ) {
         this.customLogger = new CustomLogger(AuthService.name);
+        this.redisClient = new IORedis.Redis({
+            host: process.env.REDIS_HOST || 'localhost',
+            port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+        });
     }
 
 
@@ -106,10 +113,12 @@ export class AuthService {
 
     private async create(user: User): Promise<AuthTokens> {
         try {
-            return ({
-                accessToken: this.generateToken(user, 'access', process.env.JWT_ACCESS_SECRET),
-                refreshToken: this.generateToken(user, 'refresh', process.env.JWT_REFRESH_SECRET),
-            });
+            const accessToken = this.generateToken(user, 'access', process.env.JWT_ACCESS_SECRET);
+            const refreshToken = this.generateToken(user, 'refresh', process.env.JWT_REFRESH_SECRET);
+
+            await this.saveRefreshTokenToRedis(user.id, refreshToken);
+
+            return { accessToken, refreshToken };
         } catch (error) {
             this.customLogger.error(this.create.name, error.message);
             throw new InternalServerErrorException(error);
@@ -128,5 +137,18 @@ export class AuthService {
             this.customLogger.error(this.generateToken.name, error.message);
             throw new InternalServerErrorException(error);
         }
+    }
+
+    private async saveRefreshTokenToRedis(userId: number, refreshToken: string): Promise<void> {
+        try {
+            await this.redisClient.set(`user:${userId}:refresh-token`, refreshToken);
+        } catch (error) {
+            this.customLogger.error('saveRefreshTokenToRedis', error.message);
+            throw new InternalServerErrorException(error);
+        }
+    }
+
+    async onModuleDestroy() {
+        await this.redisClient.quit();
     }
 }

@@ -1,8 +1,8 @@
 version: '3.9'
 
 services:
-  dev-app:
-    container_name: dev-app
+  dev:
+    container_name: dev-app-userway
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,26 +17,40 @@ services:
       - .:/app
     depends_on:
       - postgres
+      - redis
     networks:
-      - dev-network
+      - dev-network-userway
     restart: always
 
   postgres:
-    image: postgres:16.0
+    image: postgres:alpine
+    container_name: dev-postgres-userway
     environment:
       - POSTGRES_USER=${TYPEORM_USERNAME}
       - POSTGRES_PASSWORD=${TYPEORM_PASSWORD}
       - POSTGRES_DB=${TYPEORM_DATABASE}
+    volumes:
+      - ./src/db/pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - 5433:5433
     networks:
-      - dev-network
+      - dev-network-userway
     restart: always
 
   redis:
     image: "redis:alpine"
+    container_name: dev-redis-userway
     ports:
       - "6379:6379"
+    volumes:
+      - ./src/redis/data:/data
     networks:
-      - dev-network
+      - dev-network-userway
     restart: always
+
+networks:
+  dev-network-userway:
+    driver: bridge
+
+volumes:
+  postgres-data-dev:

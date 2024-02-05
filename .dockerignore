@@ -1,0 +1,15 @@
+node_modules
+dist
+npm-debug.log
+Dockerfile
+docker-compose.dev.yml
+docker-compose.prod.yml
+.dockerignore
+.git
+.gitignore
+.vscode
+.env
+.env.sample
+.eslintrc.js
+.prettierrc
+README.md
