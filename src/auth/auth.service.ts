@@ -42,7 +42,6 @@ export class AuthService {
 
     async register({ username, email, password }: AuthDto): Promise<ResponseDto<AuthTokens>> {
         try {
-            const hashPassword = await this.hashPassword(password);
             const existUser = await this.usersService.findOneByEmail(email);
 
             if (existUser.result) {
@@ -50,6 +49,7 @@ export class AuthService {
                 throw new ConflictException('This email already exists!');
             };
 
+            const hashPassword = await this.hashPassword(password);
             const newUser = await this.usersService.create({ username, email, password: hashPassword });
             const result = await this.create(newUser.result);
 
