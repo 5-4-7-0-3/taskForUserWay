@@ -1,8 +1,8 @@
 # compiled output
 /dist
 /node_modules
-pgdata
 redis
+pgdata
 # Logs
 logs
 *.log
