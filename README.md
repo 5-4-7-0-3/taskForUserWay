@@ -1,11 +1,17 @@
 TASK 1
+
     How to run:
+
     1 - copy .env.sample to .env
+
     2 - Start docker.
         docker-compose -f docker-compose.dev.yml up
+
     3 - Start the migration in the container.
         npm run migration:run
+
     4 - Available routes:
+
         http://localhost:5000/auth/register
         body{ username, email, password} 
 
@@ -14,7 +20,6 @@ TASK 1
 
         http://localhost:5000/users
         body{ username }
-
 
     5 - Tests are run in a docker container
         npm run test 
